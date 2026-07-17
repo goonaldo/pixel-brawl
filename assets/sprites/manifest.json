@@ -1,0 +1,130 @@
+{
+  "frameWidth": 64,
+  "frameHeight": 64,
+  "characters": [
+    {
+      "id": "warrior",
+      "name": "Sir Roland the Warrior",
+      "file": "warrior.png",
+      "animations": {
+        "idle": {
+          "row": 64,
+          "frames": 1
+        },
+        "walk": {
+          "row": 64,
+          "frames": 9
+        },
+        "shortRange": {
+          "row": 320,
+          "frames": 6
+        },
+        "longRange": {
+          "row": 576,
+          "frames": 13
+        },
+        "special": {
+          "row": 832,
+          "frames": 7
+        },
+        "hurt": {
+          "row": 1024,
+          "frames": 6
+        }
+      }
+    },
+    {
+      "id": "rogue",
+      "name": "Vex the Rogue",
+      "file": "rogue.png",
+      "animations": {
+        "idle": {
+          "row": 64,
+          "frames": 1
+        },
+        "walk": {
+          "row": 64,
+          "frames": 9
+        },
+        "shortRange": {
+          "row": 320,
+          "frames": 6
+        },
+        "longRange": {
+          "row": 576,
+          "frames": 13
+        },
+        "special": {
+          "row": 832,
+          "frames": 7
+        },
+        "hurt": {
+          "row": 1024,
+          "frames": 6
+        }
+      }
+    },
+    {
+      "id": "archer",
+      "name": "Willow the Archer",
+      "file": "archer.png",
+      "animations": {
+        "idle": {
+          "row": 64,
+          "frames": 1
+        },
+        "walk": {
+          "row": 64,
+          "frames": 9
+        },
+        "shortRange": {
+          "row": 320,
+          "frames": 6
+        },
+        "longRange": {
+          "row": 576,
+          "frames": 13
+        },
+        "special": {
+          "row": 832,
+          "frames": 7
+        },
+        "hurt": {
+          "row": 1024,
+          "frames": 6
+        }
+      }
+    },
+    {
+      "id": "mage",
+      "name": "Orin the Mage",
+      "file": "mage.png",
+      "animations": {
+        "idle": {
+          "row": 64,
+          "frames": 1
+        },
+        "walk": {
+          "row": 64,
+          "frames": 9
+        },
+        "shortRange": {
+          "row": 320,
+          "frames": 6
+        },
+        "longRange": {
+          "row": 576,
+          "frames": 13
+        },
+        "special": {
+          "row": 832,
+          "frames": 7
+        },
+        "hurt": {
+          "row": 1024,
+          "frames": 6
+        }
+      }
+    }
+  ]
+}

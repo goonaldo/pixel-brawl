@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Pixel Brawl</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div id="app">
+    <h1>PIXEL BRAWL</h1>
+
+    <div id="waitingScreen" class="screen">
+      <p>Waiting for an opponent to connect on the same wifi&hellip;</p>
+      <p class="hint">Share this page's URL with the second device.</p>
+    </div>
+
+    <div id="disconnectedScreen" class="screen hidden">
+      <p>Your opponent disconnected.</p>
+      <button id="backToLobbyBtn">Reload &amp; find a new opponent</button>
+    </div>
+
+    <div id="selectScreen" class="screen hidden">
+      <p>Choose your fighter</p>
+      <div id="characterGrid"></div>
+      <p id="selectStatus" class="hint"></p>
+    </div>
+
+    <div id="gameScreen" class="screen hidden">
+      <div id="hud">
+        <div class="healthWrap">
+          <div class="name" id="p1Name"></div>
+          <div class="healthBar"><div id="p1Health" class="healthFill"></div></div>
+        </div>
+        <div id="timer">90</div>
+        <div class="healthWrap right">
+          <div class="name" id="p2Name"></div>
+          <div class="healthBar"><div id="p2Health" class="healthFill"></div></div>
+        </div>
+      </div>
+      <canvas id="arena" width="800" height="300"></canvas>
+      <div id="controlsHint" class="hint">
+        Move: A / D &nbsp;&bull;&nbsp; Jump: W &nbsp;&bull;&nbsp;
+        Short: J &nbsp;&bull;&nbsp; Long: K &nbsp;&bull;&nbsp; Special: L
+      </div>
+    </div>
+
+    <div id="overScreen" class="screen hidden">
+      <p id="resultText"></p>
+      <button id="rematchBtn">Rematch</button>
+      <p id="rematchStatus" class="hint"></p>
+    </div>
+  </div>
+
+  <script src="/socket.io/socket.io.js"></script>
+  <script type="module" src="src/main.js"></script>
+</body>
+</html>

@@ -12,10 +12,21 @@ import { startGameLoop } from './gameLoop.js';
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const PORT = process.env.PORT || 3000;
 
+function getLanAddresses() {
+  return Object.values(os.networkInterfaces())
+    .flat()
+    .filter((iface) => iface.family === 'IPv4' && !iface.internal)
+    .map((iface) => iface.address);
+}
+
 const app = express();
 app.use(express.static(path.join(__dirname, '..', 'public')));
 app.use('/assets', express.static(path.join(__dirname, '..', 'assets')));
 app.use('/shared', express.static(path.join(__dirname, '..', 'shared')));
+
+app.get('/api/host-info', (req, res) => {
+  res.json({ port: PORT, addresses: getLanAddresses() });
+});
 
 const server = http.createServer(app);
 const io = new Server(server);
@@ -96,10 +107,7 @@ io.on('connection', (socket) => {
 startGameLoop(io, matches);
 
 server.listen(PORT, '0.0.0.0', () => {
-  const addresses = Object.values(os.networkInterfaces())
-    .flat()
-    .filter((iface) => iface.family === 'IPv4' && !iface.internal)
-    .map((iface) => iface.address);
+  const addresses = getLanAddresses();
 
   console.log(`\nFighting game server running.`);
   console.log(`  This device: http://localhost:${PORT}`);

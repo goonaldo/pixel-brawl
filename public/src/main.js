@@ -3,6 +3,7 @@ import { initInput } from './input.js';
 import { renderCharacterGrid, updateSelectStatus } from './characterSelect.js';
 import { loadAssets, draw } from './renderer.js';
 import { showScreen, updateHud, updateOverScreen } from './ui.js';
+import { loadShareLinks } from './hostInfo.js';
 
 let myId = null;
 let latestState = null;
@@ -10,7 +11,10 @@ let latestState = null;
 const canvas = document.getElementById('arena');
 const ctx = canvas.getContext('2d');
 
-network.on('waiting', () => showScreen('waiting'));
+network.on('waiting', () => {
+  showScreen('waiting');
+  loadShareLinks();
+});
 
 network.on('youAre', ({ id }) => {
   myId = id;

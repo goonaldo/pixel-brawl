@@ -3,19 +3,48 @@
 export const TICK_RATE = 30; // simulation steps per second
 export const TICK_MS = 1000 / TICK_RATE;
 
-export const ARENA_WIDTH = 800;
-export const ARENA_HEIGHT = 300;
-export const GROUND_Y = 240; // y coordinate of the floor (feet position)
+export const ARENA_WIDTH = 1100;
+export const ARENA_HEIGHT = 600;
+export const GROUND_Y = 520; // y coordinate of the floor (feet position)
 export const PLAYER_WIDTH = 48;
 export const PLAYER_HEIGHT = 64;
 
 export const GRAVITY = 1400; // px/s^2, pulls jumpY back toward 0
-export const MOVE_SPEED = 220; // px/s
-export const JUMP_SPEED = 560; // px/s upward velocity applied on jump
+export const MOVE_SPEED = 260; // px/s
+export const JUMP_SPEED = 680; // px/s upward velocity applied on jump
 
-export const MAX_HEALTH = 100;
+// Falling below this jumpY while airborne (no platform caught you) means
+// you've dropped into a stage pit — an instant round loss for whoever fell.
+export const FALL_DEATH_JUMP_Y = -250;
+
+export const MAX_HEALTH = 150;
 export const ROUND_TIME_SECONDS = 90;
 export const HURT_MS = 300; // hit-stun duration after landing a hit on someone
+
+export const CROUCH_HEIGHT_SCALE = 0.65; // hurtbox height multiplier while crouching
+export const MANA_REGEN_PER_SEC = 9;
+export const SPRINT_MULTIPLIER = 1.6;
+export const SPRINT_MANA_DRAIN_PER_SEC = 25;
+
+// Combo window: a hit must land within this many ms of the previous hit
+// (by the same attacker, on the same target) to extend the combo chain.
+export const COMBO_WINDOW_MS = 1500;
+export const COMBO_MULTIPLIER_STEP = 0.2; // +20% damage (and score) per chained hit
+export const SCORE_PER_DAMAGE = 10;
+
+export const TAUNT_COOLDOWN_MS = 1500;
+
+// Special-attack charge meter: landing any hit builds it up (faster with a
+// bigger combo multiplier — see COMBO_MULTIPLIER_STEP), and a 4-hit combo
+// maxes it out instantly regardless of how much had built up. Casting a
+// special locks in a damage/knockback multiplier based on charge at the
+// moment of the cast (interpolated between the min/max below) and spends
+// the whole meter, win or miss.
+export const SPECIAL_CHARGE_MAX = 100;
+export const SPECIAL_CHARGE_PER_HIT = 20;
+export const SPECIAL_CHARGE_COMBO_INSTANT = 4; // combo hit count that force-maxes the meter
+export const SPECIAL_CHARGE_MULT_MIN = 0.7; // uncharged special: weaker than before
+export const SPECIAL_CHARGE_MULT_MAX = 2.0; // fully charged special: much stronger
 
 // Player can't leave the arena horizontally.
 export const MIN_X = PLAYER_WIDTH / 2;

@@ -1,5 +1,6 @@
 import { network } from './network.js';
 import { colorFor } from './palette.js';
+import { unlockAudio, sfx } from './audio.js';
 
 const grid = document.getElementById('characterGrid');
 const statusEl = document.getElementById('selectStatus');
@@ -30,10 +31,13 @@ export function renderCharacterGrid(characters) {
 
     card.append(swatch, name, blurb);
     card.addEventListener('click', () => {
+      unlockAudio();
+      sfx.uiSelect();
       myPickedId = character.id;
       network.selectCharacter(character.id);
       updatePickedHighlight();
     });
+    card.addEventListener('mouseenter', () => sfx.uiHover());
     grid.appendChild(card);
   }
 }
@@ -52,8 +56,10 @@ export function updateSelectStatus(state, myId) {
 
   if (!me?.characterId) {
     statusEl.textContent = 'Pick a fighter above.';
+  } else if (!state.stageId) {
+    statusEl.textContent = `You picked ${me.characterId}. Now pick a stage below.`;
   } else if (!opponent?.characterId) {
-    statusEl.textContent = `You picked ${me.characterId}. Waiting for opponent to pick...`;
+    statusEl.textContent = 'Waiting for opponent to pick a fighter...';
   } else {
     statusEl.textContent = 'Starting...';
   }

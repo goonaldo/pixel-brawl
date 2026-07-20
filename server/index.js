@@ -6,6 +6,8 @@ import express from 'express';
 import { Server } from 'socket.io';
 
 import { CHARACTERS } from '../shared/characters.js';
+import { randomTaunt } from '../shared/taunts.js';
+import { TAUNT_COOLDOWN_MS } from '../shared/constants.js';
 import { Match } from './match.js';
 import { startGameLoop } from './gameLoop.js';
 
@@ -33,6 +35,7 @@ const io = new Server(server);
 
 const matches = new Map(); // matchId -> Match
 const socketToMatch = new Map(); // socket.id -> matchId
+const lastTauntAt = new Map(); // socket.id -> timestamp (ms)
 let lobby = []; // socket ids waiting for an opponent
 let matchCounter = 0;
 
@@ -82,12 +85,24 @@ io.on('connection', (socket) => {
     matches.get(socketToMatch.get(socket.id))?.selectCharacter(socket.id, characterId);
   });
 
+  socket.on('selectStage', ({ stageId } = {}) => {
+    matches.get(socketToMatch.get(socket.id))?.selectStage(socket.id, stageId);
+  });
+
   socket.on('move', ({ dir } = {}) => {
     matches.get(socketToMatch.get(socket.id))?.setMoveDir(socket.id, dir);
   });
 
   socket.on('jump', () => {
     matches.get(socketToMatch.get(socket.id))?.jump(socket.id);
+  });
+
+  socket.on('duck', ({ active } = {}) => {
+    matches.get(socketToMatch.get(socket.id))?.setDuckHeld(socket.id, active);
+  });
+
+  socket.on('sprint', ({ active } = {}) => {
+    matches.get(socketToMatch.get(socket.id))?.setSprintHeld(socket.id, active);
   });
 
   socket.on('attack', ({ key } = {}) => {
@@ -98,8 +113,20 @@ io.on('connection', (socket) => {
     matches.get(socketToMatch.get(socket.id))?.requestRematch(socket.id);
   });
 
+  socket.on('taunt', () => {
+    const matchId = socketToMatch.get(socket.id);
+    const match = matches.get(matchId);
+    if (!match || !match.hasPlayer(socket.id)) return;
+    const now = Date.now();
+    const last = lastTauntAt.get(socket.id) || 0;
+    if (now - last < TAUNT_COOLDOWN_MS) return;
+    lastTauntAt.set(socket.id, now);
+    io.to(matchId).emit('taunt', { playerId: socket.id, message: randomTaunt() });
+  });
+
   socket.on('disconnect', () => {
     lobby = lobby.filter((id) => id !== socket.id);
+    lastTauntAt.delete(socket.id);
     endMatchFor(socket.id, true);
   });
 });

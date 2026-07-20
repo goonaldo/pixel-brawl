@@ -13,7 +13,7 @@ body {
 
 #app {
   width: 100%;
-  max-width: 860px;
+  max-width: 1160px;
   padding: 16px;
   text-align: center;
 }
@@ -91,6 +91,25 @@ button:hover { background: #fff0a8; }
 .charCard .charBlurb { font-size: 0.8em; color: #c0c0e0; }
 .charCard canvas { image-rendering: pixelated; margin-bottom: 6px; }
 
+#stageGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 12px;
+  margin: 16px 0;
+}
+
+.stageCard {
+  border: 3px solid #4a4a7a;
+  background: #1a1a2e;
+  padding: 12px;
+  cursor: pointer;
+}
+.stageCard:hover { border-color: #ffd23f; }
+.stageCard.picked { border-color: #4ade80; background: #16321f; }
+.stageCard .stageName { font-weight: bold; color: #ffd23f; margin-bottom: 4px; }
+.stageCard .stageBlurb { font-size: 0.8em; color: #c0c0e0; }
+.stageCard canvas { image-rendering: pixelated; margin-bottom: 6px; width: 100%; height: auto; }
+
 #hud {
   display: flex;
   align-items: center;
@@ -116,11 +135,85 @@ button:hover { background: #fff0a8; }
   transition: width 0.1s linear;
 }
 
+.manaBar {
+  height: 10px;
+  margin-top: 3px;
+  background: #10163a;
+  border: 2px solid #000;
+}
+.healthWrap.right .manaBar { direction: rtl; }
+.manaFill {
+  height: 100%;
+  width: 100%;
+  background: linear-gradient(#60a5fa, #2563eb);
+  transition: width 0.1s linear;
+}
+
+.chargeBar {
+  height: 6px;
+  margin-top: 3px;
+  background: #2a1808;
+  border: 2px solid #000;
+}
+.healthWrap.right .chargeBar { direction: rtl; }
+.chargeFill {
+  height: 100%;
+  width: 0%;
+  background: linear-gradient(#ffe066, #ff8a00);
+  transition: width 0.15s linear;
+}
+.chargeFill.full {
+  box-shadow: 0 0 6px 1px #ffd23f;
+}
+
+.scoreRow {
+  margin-top: 3px;
+  font-size: 0.8em;
+  color: #c0c0e0;
+  display: flex;
+  gap: 6px;
+  align-items: center;
+}
+.healthWrap.right .scoreRow { justify-content: flex-end; }
+.comboTag {
+  color: #ff5fa2;
+  font-weight: bold;
+  animation: comboPop 0.25s ease-out;
+}
+.comboTag.hidden { display: none; }
+@keyframes comboPop {
+  from { transform: scale(1.6); opacity: 0; }
+  to { transform: scale(1); opacity: 1; }
+}
+
+.centerHud {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+}
+
 #timer {
   font-size: 1.4em;
   font-weight: bold;
   color: #ffd23f;
   min-width: 50px;
+  text-align: center;
+}
+
+#muteBtn {
+  margin: 0;
+  padding: 2px 8px;
+  font-size: 0.9em;
+  background: #1a1a2e;
+  border: 2px solid #4a4a7a;
+  color: #f0f0f0;
+}
+#muteBtn:hover { background: #26264a; }
+
+#arenaWrap {
+  position: relative;
+  width: 100%;
 }
 
 #arena {
@@ -134,4 +227,16 @@ button:hover { background: #fff0a8; }
 
 #controlsHint { margin-top: 8px; }
 
-#resultText { font-size: 1.3em; color: #ffd23f; }
+#overOverlay {
+  position: absolute;
+  inset: 4px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  background: rgba(13, 13, 26, 0.72);
+}
+#overOverlay.hidden { display: none; }
+
+#resultText { font-size: 1.4em; color: #ffd23f; text-shadow: 2px 2px 0 #b3391f; margin: 0; }

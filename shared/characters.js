@@ -3,6 +3,7 @@
 //
 // Every attack has the same shape so combat.js can handle them generically:
 //   damage        - HP removed on a landed hit
+//   manaCost      - mana spent when the attack is thrown (see match.js startAttack)
 //   startupMs     - delay from input before the hit becomes active (telegraph)
 //   activeMs      - window during which the hitbox can actually land
 //   recoveryMs    - time after the active window before the player can act again
@@ -11,16 +12,35 @@
 //                        ranged: the projectile's own size
 //   projectileSpeed/lifetimeMs - only set for longRange/special attacks that spawn
 //                        a traveling projectile instead of an instant melee box
+//
+// `groundSmash` is a 4th attack every character has: pressing shortRange
+// while airborne and holding Down (see match.js) forces a fast fall
+// (slamSpeed) and deals AoE damage (aoeRadius) on landing instead of the
+// normal startup/active/recovery melee flow.
+//
+// Every character also shares 3 more universal, state-triggered attacks
+// (see match.js startAttack for exactly how each is triggered):
+//   spinKick     - Sprint + shortRange, grounded. A wide AoE box centered on
+//                  the attacker (hitboxWidth/Height) that hits on both sides.
+//   throw        - Duck + longRange, grounded. An unblockable grab; `grabRange`
+//                  is the max distance (px) for it to connect instead of an
+//                  AABB hitbox.
+//   launcherKick - special while airborne. `knockbackVY` (px/s, positive =
+//                  upward) launches the opponent vertically in addition to
+//                  the normal horizontal `knockback`.
+// `maxMana` (a sibling of `attacks`) is each character's mana pool.
 
 export const CHARACTERS = [
   {
     id: 'warrior',
     name: 'Warrior',
     blurb: 'Heavy sword, high damage up close.',
+    maxMana: 70,
     attacks: {
       shortRange: {
         name: 'Slash',
         damage: 12,
+        manaCost: 12,
         startupMs: 120,
         activeMs: 100,
         recoveryMs: 220,
@@ -31,6 +51,7 @@ export const CHARACTERS = [
       longRange: {
         name: 'Throwing Knife',
         damage: 6,
+        manaCost: 8,
         startupMs: 150,
         activeMs: 50,
         recoveryMs: 300,
@@ -43,6 +64,7 @@ export const CHARACTERS = [
       special: {
         name: 'Power Strike',
         damage: 24,
+        manaCost: 39,
         startupMs: 400,
         activeMs: 120,
         recoveryMs: 400,
@@ -51,16 +73,65 @@ export const CHARACTERS = [
         hitboxHeight: 60,
         knockback: 260,
       },
+      groundSmash: {
+        name: 'Ground Slam',
+        damage: 18,
+        manaCost: 30,
+        startupMs: 90,
+        recoveryMs: 300,
+        cooldownMs: 4000,
+        slamSpeed: 1600,
+        aoeRadius: 70,
+        knockback: 240,
+      },
+      spinKick: {
+        name: 'Spin Kick',
+        damage: 14,
+        manaCost: 20,
+        startupMs: 150,
+        activeMs: 180,
+        recoveryMs: 260,
+        cooldownMs: 2200,
+        hitboxWidth: 140,
+        hitboxHeight: 60,
+        knockback: 560,
+      },
+      throw: {
+        name: 'Throw',
+        damage: 16,
+        manaCost: 25,
+        startupMs: 150,
+        activeMs: 450,
+        recoveryMs: 300,
+        cooldownMs: 3200,
+        grabRange: 100,
+        knockback: 900,
+      },
+      launcherKick: {
+        name: 'Launcher Kick',
+        damage: 13,
+        manaCost: 28,
+        startupMs: 130,
+        activeMs: 140,
+        recoveryMs: 260,
+        cooldownMs: 3000,
+        hitboxWidth: 60,
+        hitboxHeight: 56,
+        knockback: 320,
+        knockbackVY: 1150,
+      },
     },
   },
   {
     id: 'archer',
     name: 'Archer',
     blurb: 'Fast bow, strong at range.',
+    maxMana: 90,
     attacks: {
       shortRange: {
         name: 'Dagger Jab',
         damage: 7,
+        manaCost: 8,
         startupMs: 90,
         activeMs: 80,
         recoveryMs: 180,
@@ -71,6 +142,7 @@ export const CHARACTERS = [
       longRange: {
         name: 'Arrow Shot',
         damage: 14,
+        manaCost: 14,
         startupMs: 120,
         activeMs: 50,
         recoveryMs: 260,
@@ -83,6 +155,7 @@ export const CHARACTERS = [
       special: {
         name: 'Volley',
         damage: 9,
+        manaCost: 24,
         startupMs: 300,
         activeMs: 50,
         recoveryMs: 350,
@@ -94,16 +167,65 @@ export const CHARACTERS = [
         projectileCount: 3,
         projectileSpreadMs: 90,
       },
+      groundSmash: {
+        name: 'Ground Slam',
+        damage: 18,
+        manaCost: 30,
+        startupMs: 90,
+        recoveryMs: 300,
+        cooldownMs: 4000,
+        slamSpeed: 1600,
+        aoeRadius: 70,
+        knockback: 240,
+      },
+      spinKick: {
+        name: 'Spin Kick',
+        damage: 14,
+        manaCost: 20,
+        startupMs: 150,
+        activeMs: 180,
+        recoveryMs: 260,
+        cooldownMs: 2200,
+        hitboxWidth: 140,
+        hitboxHeight: 60,
+        knockback: 560,
+      },
+      throw: {
+        name: 'Throw',
+        damage: 16,
+        manaCost: 25,
+        startupMs: 150,
+        activeMs: 450,
+        recoveryMs: 300,
+        cooldownMs: 3200,
+        grabRange: 100,
+        knockback: 900,
+      },
+      launcherKick: {
+        name: 'Launcher Kick',
+        damage: 13,
+        manaCost: 28,
+        startupMs: 130,
+        activeMs: 140,
+        recoveryMs: 260,
+        cooldownMs: 3000,
+        hitboxWidth: 60,
+        hitboxHeight: 56,
+        knockback: 320,
+        knockbackVY: 1150,
+      },
     },
   },
   {
     id: 'mage',
     name: 'Mage',
     blurb: 'Slow but devastating magic.',
+    maxMana: 130,
     attacks: {
       shortRange: {
         name: 'Staff Bash',
         damage: 8,
+        manaCost: 8,
         startupMs: 150,
         activeMs: 100,
         recoveryMs: 260,
@@ -114,6 +236,7 @@ export const CHARACTERS = [
       longRange: {
         name: 'Fireball',
         damage: 16,
+        manaCost: 16,
         startupMs: 220,
         activeMs: 60,
         recoveryMs: 340,
@@ -126,6 +249,7 @@ export const CHARACTERS = [
       special: {
         name: 'Arcane Nova',
         damage: 26,
+        manaCost: 41,
         startupMs: 550,
         activeMs: 150,
         recoveryMs: 500,
@@ -134,16 +258,65 @@ export const CHARACTERS = [
         hitboxHeight: 90,
         knockback: 320,
       },
+      groundSmash: {
+        name: 'Ground Slam',
+        damage: 18,
+        manaCost: 30,
+        startupMs: 90,
+        recoveryMs: 300,
+        cooldownMs: 4000,
+        slamSpeed: 1600,
+        aoeRadius: 70,
+        knockback: 240,
+      },
+      spinKick: {
+        name: 'Spin Kick',
+        damage: 14,
+        manaCost: 20,
+        startupMs: 150,
+        activeMs: 180,
+        recoveryMs: 260,
+        cooldownMs: 2200,
+        hitboxWidth: 140,
+        hitboxHeight: 60,
+        knockback: 560,
+      },
+      throw: {
+        name: 'Throw',
+        damage: 16,
+        manaCost: 25,
+        startupMs: 150,
+        activeMs: 450,
+        recoveryMs: 300,
+        cooldownMs: 3200,
+        grabRange: 100,
+        knockback: 900,
+      },
+      launcherKick: {
+        name: 'Launcher Kick',
+        damage: 13,
+        manaCost: 28,
+        startupMs: 130,
+        activeMs: 140,
+        recoveryMs: 260,
+        cooldownMs: 3000,
+        hitboxWidth: 60,
+        hitboxHeight: 56,
+        knockback: 320,
+        knockbackVY: 1150,
+      },
     },
   },
   {
     id: 'rogue',
     name: 'Rogue',
     blurb: 'Fast flurries and a deadly dash.',
+    maxMana: 90,
     attacks: {
       shortRange: {
         name: 'Dagger Flurry',
         damage: 9,
+        manaCost: 9,
         startupMs: 70,
         activeMs: 90,
         recoveryMs: 150,
@@ -154,6 +327,7 @@ export const CHARACTERS = [
       longRange: {
         name: 'Throwing Dagger',
         damage: 8,
+        manaCost: 8,
         startupMs: 100,
         activeMs: 50,
         recoveryMs: 220,
@@ -166,6 +340,7 @@ export const CHARACTERS = [
       special: {
         name: 'Dash Strike',
         damage: 20,
+        manaCost: 35,
         startupMs: 180,
         activeMs: 120,
         recoveryMs: 300,
@@ -174,6 +349,53 @@ export const CHARACTERS = [
         hitboxHeight: 50,
         dashSpeed: 900,
         dashMs: 180,
+      },
+      groundSmash: {
+        name: 'Ground Slam',
+        damage: 18,
+        manaCost: 30,
+        startupMs: 90,
+        recoveryMs: 300,
+        cooldownMs: 4000,
+        slamSpeed: 1600,
+        aoeRadius: 70,
+        knockback: 240,
+      },
+      spinKick: {
+        name: 'Spin Kick',
+        damage: 14,
+        manaCost: 20,
+        startupMs: 150,
+        activeMs: 180,
+        recoveryMs: 260,
+        cooldownMs: 2200,
+        hitboxWidth: 140,
+        hitboxHeight: 60,
+        knockback: 560,
+      },
+      throw: {
+        name: 'Throw',
+        damage: 16,
+        manaCost: 25,
+        startupMs: 150,
+        activeMs: 450,
+        recoveryMs: 300,
+        cooldownMs: 3200,
+        grabRange: 100,
+        knockback: 900,
+      },
+      launcherKick: {
+        name: 'Launcher Kick',
+        damage: 13,
+        manaCost: 28,
+        startupMs: 130,
+        activeMs: 140,
+        recoveryMs: 260,
+        cooldownMs: 3000,
+        hitboxWidth: 60,
+        hitboxHeight: 56,
+        knockback: 320,
+        knockbackVY: 1150,
       },
     },
   },
